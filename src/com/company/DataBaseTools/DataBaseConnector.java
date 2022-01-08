@@ -1,5 +1,6 @@
 package com.company.DataBaseTools;
 import com.company.cards.BaseCard;
+import com.company.auxilliary.TableNames;
 
 import java.sql.*;
 public class DataBaseConnector {
@@ -16,7 +17,6 @@ public class DataBaseConnector {
 
     public void connect() throws SQLException{
         this.connection= DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        createTables();
     }
     public void disconnect() throws SQLException{
         this.connection.close();
@@ -28,21 +28,27 @@ public class DataBaseConnector {
     public void createUserTable(){
         PreparedStatement ps;
         try{
-            ps=connection.prepareStatement("CREATE TABLE users (username varchar(255) not null , password varchar(255) not null, coins int default 20, elo int default 100, wins int default 0, losses int default 0, collection varchar(255))");
+            ps=connection.prepareStatement("CREATE TABLE " + TableNames.getUserListTableName() +" (username varchar(255) not null , password varchar(255) not null, coins int default 20, elo int default 100, wins int default 0, losses int default 0, collection varchar(255))");
             ps.executeUpdate();
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            System.out.println("User-Table already exists");
         }
         try{
             ps=connection.prepareStatement("CREATE UNIQUE INDEX users_username_uindex ON users (username);");
             ps.executeUpdate();
         }catch (SQLException e){
-            System.out.println(e.getMessage());
+            System.out.println("User index already exists");
         }
     }
 
     private void createTradeTable(){
-
+        PreparedStatement ps;
+        try {
+            ps = connection.prepareStatement("CREATE TABLE " + TableNames.getTradeTableName() +" (id serial, trader varchar(255) not NULL , cardID int not NULL, condition varchar(255) not NULL, power int not NULL)");
+            ps.executeUpdate();
+        }catch(SQLException e){
+            System.out.println("Trade-Table already exists");
+        }
     }
 
     public void setElo(String username, int eloChange) throws SQLException{
@@ -101,7 +107,7 @@ public class DataBaseConnector {
 
     public void createUser(String username, String password) throws SQLException{
         PreparedStatement ps;
-        String stackName= username + "_stack";
+        String stackName= username + TableNames.getUserStackTableAddon();
         ps=connection.prepareStatement("INSERT INTO users (username, password, collection) VALUES (?,?,?)");
         ps.setString(1, username);
         ps.setString(2, password);
@@ -116,9 +122,10 @@ public class DataBaseConnector {
         ps.executeUpdate();
     }
 
-    public void addCard(BaseCard card, String table) throws SQLException{
+    public void addCard(BaseCard card, String username) throws SQLException{
         PreparedStatement ps;
         ResultSet rs;
+        String table= username + TableNames.getUserStackTableAddon();
         ps= connection.prepareStatement("SELECT amount FROM " + table +" WHERE name =?");
         ps.setString(1, card.getName());
         rs= ps.executeQuery();
@@ -158,6 +165,10 @@ public class DataBaseConnector {
         }
         rs.close();
         return false;
+    }
+
+    public boolean tryTrade(){
+        return true;
     }
 
 

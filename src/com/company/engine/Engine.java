@@ -21,13 +21,14 @@ public class Engine {
         this.maxRounds=AUTO_MAX_ROUNDS;
     }
 
-    public void battle(){
+    public Result battle(){
         System.out.println("New Game!\n" +
-                "\nPlayer As Deck: \n" + deckA +
-                "\nPlayer Bs Deck: \n" + deckB);
+                "\n" + deckA.getOwner() +"s Deck: \n" + deckA +
+                "\n" + deckB.getOwner() +"s Deck: \n" + deckB);
         BaseCard cardA;
         BaseCard cardB;
-        int damage;
+        Result result;
+        Result endResult=new Result();
         if(deckA.size()==0 || deckB.size()==0){
             System.out.println("Please enter two non-empty decks" +
                     "\nCards in Deck A: " + deckA.size() +
@@ -36,31 +37,41 @@ public class Engine {
         for(int i=0; i<maxRounds;i++){
             cardA=deckA.getRandomCard();
             cardB=deckB.getRandomCard();
-            damage= Judge.judgeFight(cardA,cardB);
-            if(damage==0){
+            result= Judge.judgeFight(cardA,cardB, deckA.getOwner(), deckB.getOwner());
+            if(result.isDraw()){
                 deckA.addCards(cardA);
                 deckB.addCards(cardB);
             }
-            else if(damage>0){
+            else if(result.getWinner()==deckA.getOwner()){
                 deckA.addCards(cardA, cardB);
             }
-            else if(damage<0){
+            else if(result.getWinner()==deckB.getOwner()){
                 deckB.addCards(cardA, cardB);
             }
 
             if (checkForDeckOut()){
-                return;
+                if(deckA.size()==0){
+                    endResult.setWinner(deckB.getOwner());
+                    endResult.setLoser(deckA.getOwner());
+                }
+                else if(deckB.size()==0){
+                    endResult.setWinner(deckA.getOwner());
+                    endResult.setLoser(deckB.getOwner());
+                }
+                return endResult;
             }
         }
         System.out.println("Game ended with a Draw!\n");
+        endResult.setDraw(true);
+        return endResult;
     }
 
     public boolean checkForDeckOut(){
         if(deckA.size()==0){
-            System.out.println("Player A lost the Game due to Deckout!\n");
+            System.out.println(""+ deckA.getOwner()+ " lost the Game due to Deckout!\n");
         }
         else if(deckB.size()==0){
-            System.out.println("Player B lost the Game due to Deckout!\n");
+            System.out.println(""+ deckB.getOwner()+ " lost the Game due to Deckout!\n");
         }
         else{
             return false;

@@ -4,19 +4,20 @@ import java.util.LinkedList;
 
 public class Deck {
     private LinkedList list;
+    private final String OWNER;
 
-    public Deck(BaseCard... cards) {
+    public Deck(String owner, BaseCard... cards) {
         this.list=new LinkedList();
         for (BaseCard card:cards){
             list.add(card);
         }
+        this.OWNER=owner;
     }
 
     public int size(){
         return list.size();
     }
-
-    //Eventuell ducktype für return
+    
     public BaseCard getRandomCard(){
         int size = this.list.size();
         if(size==0){
@@ -31,9 +32,13 @@ public class Deck {
             list.add(card);
         }
     }
+    public String getOwner(){
+        return this.OWNER;
+    }
     public String toString(){
         int size= list.size();
         StringBuilder sb= new StringBuilder();
+        sb.append("\tOwner: " + this.OWNER + "\n");
         sb.append("\tAmount of Cards: " + size() + "\n");
         sb.append("\tCards{");
         for(int i=0; i<size; i++){

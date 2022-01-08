@@ -1,34 +1,34 @@
 package com.company;
-import com.company.DataBaseTools.DataBaseConnector;
-import com.company.auxilliary.CardType;
-import com.company.auxilliary.Elements;
-import com.company.cards.BaseCard;
-import com.company.cards.CreatureCard;
-import com.company.cards.SpellCard;
-import com.company.deckTools.Deck;
-import com.company.engine.Engine;
+import com.company.application.MTCG;
+import com.company.application.MonsterTradingCardGame;
+import com.company.server.MyServer;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        DataBaseConnector db= new DataBaseConnector("jdbc:postgresql://localhost:5432/mydb", "postgres", "");
+        startServer();
+
+        /*DataBaseConnector db= new DataBaseConnector("jdbc:postgresql://localhost:5432/mydb", "postgres", "");
         try{
             db.connect();
-            if(db.tryLogin("rt", "test")){
-                System.out.println("login erfolgreich");
-            }
-            else{
-                System.out.println("login ist fehlgeschlagen");
-            }
+            db.addCard(new CreatureCard("FireGoblin", 50, Elements.FIRE), "test");
+            db.addCard(new CreatureCard("FireGoblin", 50, Elements.FIRE), "test");
+            db.addCard(new SpellCard("WaterSpout", 20, Elements.WATER), "test");
             db.disconnect();
         }catch (SQLException e){
             System.out.println(e.getMessage());
+        }*/
+    }
+
+    public static void startServer(){
+        MyServer server = new MyServer(new MTCG());
+        try {
+            server.start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
