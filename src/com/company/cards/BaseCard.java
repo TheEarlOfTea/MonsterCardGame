@@ -1,6 +1,6 @@
 package com.company.cards;
-import com.company.auxilliary.Elements;
-import com.company.auxilliary.CardType;
+import com.company.auxilliary.enumUtils.Elements;
+import com.company.auxilliary.enumUtils.CardType;
 
 public class BaseCard {
     private  String name;

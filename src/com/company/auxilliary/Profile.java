@@ -4,8 +4,7 @@ public class Profile {
     private String username;
     private String name;
     private String bio;
-    private String picture;
-    private boolean isBattleReady;
+    private String image;
     private int wins;
     private int losses;
     private int elo;
@@ -41,20 +40,12 @@ public class Profile {
         this.bio = bio;
     }
 
-    public String getPicture() {
-        return picture;
+    public String getImage() {
+        return image;
     }
 
-    public void setPicture(String picture) {
-        this.picture = picture;
-    }
-
-    public boolean isBattleReady() {
-        return isBattleReady;
-    }
-
-    public void setBattleReady(boolean battleReady) {
-        isBattleReady = battleReady;
+    public void setImage(String image) {
+        this.image = image;
     }
 
     public int getWins() {
@@ -87,5 +78,19 @@ public class Profile {
 
     public void setCoins(int coins) {
         this.coins = coins;
+    }
+
+    @Override
+    public String toString() {
+        return "Profile{" +
+                "username='" + username + '\'' +
+                ", name='" + name + '\'' +
+                ", bio='" + bio + '\'' +
+                ", image='" + image + '\'' +
+                ", wins=" + wins +
+                ", losses=" + losses +
+                ", elo=" + elo +
+                ", coins=" + coins +
+                '}';
     }
 }

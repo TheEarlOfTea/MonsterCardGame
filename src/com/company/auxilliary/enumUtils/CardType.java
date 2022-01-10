@@ -1,4 +1,4 @@
-package com.company.auxilliary;
+package com.company.auxilliary.enumUtils;
 
 public enum CardType {
     CREATURE,

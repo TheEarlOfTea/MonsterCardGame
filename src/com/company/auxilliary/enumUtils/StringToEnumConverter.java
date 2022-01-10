@@ -1,6 +1,4 @@
-package com.company.auxilliary;
-
-import java.util.Locale;
+package com.company.auxilliary.enumUtils;
 
 public class StringToEnumConverter {
     public static Elements getElement(String element){

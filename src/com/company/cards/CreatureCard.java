@@ -1,6 +1,6 @@
 package com.company.cards;
-import com.company.auxilliary.Elements;
-import com.company.auxilliary.CardType;
+import com.company.auxilliary.enumUtils.Elements;
+import com.company.auxilliary.enumUtils.CardType;
 
 public class CreatureCard extends BaseCard{
     public CreatureCard(String uid, String name, int power, Elements element){

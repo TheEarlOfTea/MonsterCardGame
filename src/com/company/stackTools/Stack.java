@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class Stack {
     private LinkedList<BaseCard> deck;
-    private final String OWNER;
+    private String OWNER;
 
     public Stack(String owner, BaseCard... cards) {
         this.deck =new LinkedList<BaseCard>();

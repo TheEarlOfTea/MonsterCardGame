@@ -1,6 +1,6 @@
 package com.company.auxilliary;
 
-public class TokenGenerator {
+public class TokenNames {
     public static String getAdminToken(){
         return "adminToken";
     }

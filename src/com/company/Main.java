@@ -15,9 +15,6 @@ public class Main {
 
         DataBaseSetup.setUp();
         startServer();
-        //DB();
-
-
 
     }
 
@@ -27,15 +24,6 @@ public class Main {
             server.start();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-    public static void DB(){
-        DataBaseConnector db= new DataBaseConnector();
-        try{
-            db.connect();
-            db.disconnect();
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
         }
     }
 }

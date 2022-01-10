@@ -1,7 +1,7 @@
 package com.company.engine;
-import com.company.auxilliary.Elements;
+import com.company.auxilliary.enumUtils.Elements;
 import com.company.cards.BaseCard;
-import com.company.auxilliary.CardType;
+import com.company.auxilliary.enumUtils.CardType;
 
 public class Judge {
     public static Result judgeFight(BaseCard a, BaseCard b, String playerA, String playerB){

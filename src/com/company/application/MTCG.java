@@ -1,12 +1,13 @@
 package com.company.application;
 
-import com.company.auxilliary.StringToEnumConverter;
-import com.company.auxilliary.Token;
+import com.company.auxilliary.*;
+import com.company.auxilliary.enumUtils.StringToEnumConverter;
+import com.company.auxilliary.scoreBoardUtils.ScoreBoard;
 import com.company.cards.BaseCard;
 import com.company.dataBaseTools.DataBaseConnector;
-import com.company.auxilliary.User;
 import com.company.dataBaseTools.TableNames;
 import com.company.server.http.ContentType;
+import com.company.stackTools.DeckList;
 import com.company.stackTools.Stack;
 import com.company.server.Request;
 import com.company.server.Response;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.core.*;
 import com.fasterxml.jackson.databind.*;
 
 import java.sql.SQLException;
+import java.util.LinkedList;
 
 public class MTCG implements ServerApplication {
 
@@ -54,16 +56,34 @@ public class MTCG implements ServerApplication {
     private BaseCard decodeCardJson(JsonNode node){
         BaseCard b= new BaseCard();
 
-        String type=node.get("Type").toString().replace("\"", "");
-        String element=node.get("Element").toString().replace("\"", "");
-
-        b.setUid(node.get("Id").toString());
-        b.setName(node.get("Name").toString());
+        b.setUid(node.get("Id").toString().replace("\"", ""));
+        b.setName(node.get("Name").toString().replace("\"", ""));
         b.setPower(Integer.parseInt(node.get("Damage").toString()));
-        b.setElement(StringToEnumConverter.getElement(element));
-        b.setType(StringToEnumConverter.getCardType(type));
+        b.setElement(StringToEnumConverter.getElement(node.get("Element").toString().replace("\"", "")));
+        b.setType(StringToEnumConverter.getCardType(node.get("Type").toString().replace("\"", "")));
 
         return b;
+    }
+    private DeckList decodeListJson(String json, String username) throws JsonProcessingException{
+        JsonFactory factory= new JsonFactory();
+        ObjectMapper mapper= new ObjectMapper(factory);
+        DeckList l= new DeckList(username);
+        JsonNode node= mapper.readTree(json);
+        for(int i=0; i< node.size(); i++){
+            l.addUID(node.get(i).toString().replace("\"", ""));
+        }
+        return l;
+    }
+
+    private Profile decodeProfileJson(String json) throws JsonProcessingException {
+        JsonFactory factory= new JsonFactory();
+        ObjectMapper mapper= new ObjectMapper(factory);
+        JsonNode node= mapper.readTree(json);
+        Profile profile= new Profile();
+        profile.setName(node.get("Name").toString().replace("\"", ""));
+        profile.setBio(node.get("Bio").toString().replace("\"", ""));
+        profile.setImage(node.get("Image").toString().replace("\"", ""));
+        return profile;
     }
 
     private String serializeObject(Object object) throws JsonProcessingException{
@@ -97,9 +117,23 @@ public class MTCG implements ServerApplication {
         if(!token.getToken().isEmpty()){
             switch (request.getRoute()){
                 case "/transactions/packages":
-                    return acquirePack(token.getUsername(), request.getContent(), db);
-                case"/cards":
-                    return getCollection(token.getUsername(), db);
+                    return acquirePack(token.getUsername(), request, db);
+                case "/cards":
+                    return getCollection(token.getUsername(), request, db);
+                case "/deck":
+                    return accessDeck(token.getUsername(), request, db);
+                case "/deck?format=plain":
+                    return getPlainDeck(token.getUsername(), request, db);
+                case "/score":
+                    return getScoreBoard(db);
+            }
+            if(request.getRoute().length()>7){
+                if(request.getRoute().substring(0, 7).compareTo("/users/")==0){
+                    if(token.getUsername().compareTo(request.getRoute().substring(7))==0){
+                       return accessProfile(request.getRoute().substring(7), request, db);
+                    }
+                    return get404Response();
+                }
             }
         }
         try{
@@ -186,7 +220,11 @@ public class MTCG implements ServerApplication {
         return response;
     }
 
-    public Response acquirePack(String username, String packName, DataBaseConnector db){
+    public Response acquirePack(String username, Request request, DataBaseConnector db){
+        if(request.getMethod().compareTo("POST")!=0){
+            return get501Response();
+        }
+        String packName= request.getContent();
         Response response= new Response();
         response.setContent("<!DOCTYPE html><html><body><h1>Pack successfully acquired</h1></body></html>");
         try{
@@ -215,10 +253,45 @@ public class MTCG implements ServerApplication {
         }
         return response;
     }
-    public Response getCollection(String username, DataBaseConnector db){
+    public Response getCollection(String username, Request request, DataBaseConnector db){
+        if(request.getMethod().compareTo("GET")!=0){
+            return get501Response();
+        }
         Response response= new Response();
         try{
             Stack s= db.getDeckFromTable(username, "-u");
+            response.setContent(serializeObject(s));
+            response.setContentType(ContentType.JSON);
+            return response;
+        }catch (Exception e){
+            printException(e);
+            return get500Response();
+        }
+    }
+
+    public Response accessDeck(String username, Request request, DataBaseConnector db){
+        switch (request.getMethod()){
+            case "GET":
+                return getDeck(username, db);
+            case "PUT":
+                try{
+                    DeckList l=decodeListJson(request.getContent(), username);
+                    return configureDeck(l, db);
+                }catch (JsonProcessingException e){
+                    return get500Response();
+                }
+        }
+        return get501Response();
+    }
+
+    public Response getDeck(String username, DataBaseConnector db){
+        Response response= new Response();
+        try{
+            Stack s= db.getDeckFromTable(username, "-d");
+            if(s.getDeck().size()==0){
+                response.setContent("<!DOCTYPE html><html><body><h1>Deck of " + s.getOwner() + " is Empty</h1></body></html>");
+                return response;
+            }
             response.setContent(serializeObject(s));
             return response;
         }catch (Exception e){
@@ -226,6 +299,101 @@ public class MTCG implements ServerApplication {
             return get500Response();
         }
     }
+
+    public Response configureDeck(DeckList l, DataBaseConnector db){
+        Response response= new Response();
+            if(l.getList().size()!=4){
+                return get400Response();
+            }
+            try{
+                db.addListToDeck(l.getOWNER(), l);
+            }catch (SQLException e){
+                printException(e);
+                return get400Response();
+            }
+        response.setContent("<!DOCTYPE html><html><body><h1>Deck of " + l.getOWNER() + " successfully changed</h1></body></html>");
+        return response;
+    }
+
+    public Response getPlainDeck(String username, Request request, DataBaseConnector db){
+        if(request.getMethod().compareTo("GET")!=0){
+            return get501Response();
+        }
+        Response response= new Response();
+        try{
+            Stack s= db.getDeckFromTable(username, "-d");
+            LinkedList<String> l= new LinkedList<>();
+            for(BaseCard b: s.getDeck()){
+                l.add(b.getName());
+            }
+            String json= serializeObject(l);
+            response.setContent(json);
+            response.setContentType(ContentType.JSON);
+        }catch (Exception e){
+            printException(e);
+            return get500Response();
+        }
+
+        return response;
+    }
+
+    public Response accessProfile(String username, Request request, DataBaseConnector db){
+        Response response= new Response();
+        switch (request.getMethod()){
+            case "PUT":
+                try{
+                    return setProfile(username, decodeProfileJson(request.getContent()), db);
+                }catch (JsonProcessingException e){
+                    printException(e);
+                    return get400Response();
+                }
+
+            case "GET":
+                return getProfile(username, db);
+        }
+
+        return get501Response();
+    }
+
+    public Response setProfile(String username, Profile profile, DataBaseConnector db){
+        Response response=new Response();
+        if(db.changeProfile(username, profile)){
+            response.setContent("<!DOCTYPE html><html><body><h1>Profile successfully changed</h1></body></html>");
+            return response;
+        }
+        return get400Response();
+    }
+    public Response getProfile(String username, DataBaseConnector db){
+        Response response=new Response();
+        Profile profile= db.getProfile(username);
+        if(profile==null){
+            return get400Response();
+        }
+        try{
+            response.setContent(serializeObject(profile));
+            response.setContentType(ContentType.JSON);
+            return response;
+        }catch (JsonProcessingException e){
+            printException(e);
+        }
+        return get500Response();
+    }
+
+    public Response getScoreBoard(DataBaseConnector db){
+        Response response= new Response();
+        try{
+            ScoreBoard sb= db.getScoreBoard();
+            response.setContent(serializeObject(sb));
+            response.setContentType(ContentType.JSON);
+            return response;
+        }catch (Exception e) {
+            printException(e);
+
+        }
+        return get500Response();
+    }
+
+
 
 
     public void printException(Exception e){
@@ -235,7 +403,13 @@ public class MTCG implements ServerApplication {
     public Response get400Response(){
         Response response= new Response();
         response.setStatus(HttpStatus.BAD_REQUEST);
-        response.setContent("<!DOCTYPE html><html><body><h1>ERROR 400 || Bad request - JSON was not parseable</h1></body></html>");
+        response.setContent("<!DOCTYPE html><html><body><h1>ERROR 400 || Bad request - sent illegal JSON</h1></body></html>");
+        return response;
+    }
+    public Response get404Response(){
+        Response response= new Response();
+        response.setStatus(HttpStatus.NOT_FOUND);
+        response.setContent("<!DOCTYPE html><html><body><h1>ERROR 404 || Site not found</h1></body></html>");
         return response;
     }
     public Response get500Response(){

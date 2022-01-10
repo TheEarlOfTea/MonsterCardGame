@@ -13,4 +13,7 @@ public class TableNames {
     public static String getCardListTableName(){ return "cards"; }
     public static String getPackageTableName(String name){ return "package_"+name; }
     public static String getPackageListTableName(){ return "packages"; }
+    public static String getDeckTableName(String name){
+        return "deck_"+name;
+    }
 }

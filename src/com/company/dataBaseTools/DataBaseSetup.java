@@ -1,6 +1,6 @@
 package com.company.dataBaseTools;
 
-import com.company.auxilliary.TokenGenerator;
+import com.company.auxilliary.TokenNames;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -71,7 +71,7 @@ public class DataBaseSetup {
             PreparedStatement ps= connection.prepareStatement("INSERT INTO "+ TableNames.getUserListTableName()+" (username, password, token) VALUES (?,?,?)");
             ps.setString(1, "admin");
             ps.setString(2, "istrator");
-            ps.setString(3, TokenGenerator.getAdminToken());
+            ps.setString(3, TokenNames.getAdminToken());
             ps.executeUpdate();
         }catch (SQLException e){
             System.out.println(e.getMessage());
