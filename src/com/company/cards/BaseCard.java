@@ -2,31 +2,41 @@ package com.company.cards;
 import com.company.auxilliary.Elements;
 import com.company.auxilliary.CardType;
 
-public abstract class BaseCard {
-    private final String name;
-    private final int power;
-    private final Elements element;
-    private final CardType type;
+public class BaseCard {
+    private  String name;
+    private  int power;
+    private  Elements element;
+    private  CardType type;
+    private  String uid;
 
-    protected BaseCard(String name, int power, Elements element, CardType type){
+    public BaseCard(String uid, String name, int power, Elements element, CardType type){
         this.name=name;
         this.power=power;
         this.element=element;
         this.type=type;
-
+        this.uid=uid;
     }
-    protected BaseCard(String name, int power, CardType type){
+    public BaseCard(String uid, String name, int power, CardType type){
         this.name=name;
         this.power=power;
         this.type=type;
         this.element= Elements.NORMAL;
-
+        this.uid=uid;
+    }
+    public BaseCard(){
+        name=null;
+        power=0;
+        element=null;
+        type=null;
+        uid=null;
     }
 
     public String toString(){
         String tabs= "\t\t\t";
         StringBuilder sb= new StringBuilder();
-        sb.append(tabs + "Name: ");
+        sb.append(tabs + "UID: ");
+        sb.append(this.uid);
+        sb.append("\n" + tabs + "Name: ");
         sb.append(this.name);
         sb.append("\n" + tabs + "Power: ");
         sb.append(this.power);
@@ -37,17 +47,45 @@ public abstract class BaseCard {
         return sb.toString();
     }
 
-    public String getName(){
+    public String getName() {
         return name;
     }
-    public int getPower() {
-        return this.power;
+
+    public void setName(String name) {
+        this.name = name;
     }
+
+    public int getPower() {
+        return power;
+    }
+
+    public void setPower(int power) {
+        this.power = power;
+    }
+
     public Elements getElement() {
         return element;
     }
+
+    public void setElement(Elements element) {
+        this.element = element;
+    }
+
     public CardType getType() {
         return type;
     }
 
+    public void setType(CardType type) {
+        this.type = type;
+    }
+
+    public String getUid() {
+        return uid;
+    }
+
+    public void setUid(String uid) {
+        this.uid = uid;
+    }
 }
+
+

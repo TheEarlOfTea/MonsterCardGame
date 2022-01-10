@@ -1,26 +1,26 @@
 package com.company;
 import com.company.application.MTCG;
-import com.company.application.MonsterTradingCardGame;
+import com.company.auxilliary.Profile;
+import com.company.dataBaseTools.DataBaseSetup;
 import com.company.server.MyServer;
+import com.company.dataBaseTools.DataBaseConnector;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SQLException{
 
-        startServer();
+        /*ÜDataBaseSetup.setUp();
+        startServer();*/
+        Profile p= new Profile();
+        p.setWins(3);
+        p.setLosses(7);
+        System.out.println(p.getWinrate());
 
-        /*DataBaseConnector db= new DataBaseConnector("jdbc:postgresql://localhost:5432/mydb", "postgres", "");
-        try{
-            db.connect();
-            db.addCard(new CreatureCard("FireGoblin", 50, Elements.FIRE), "test");
-            db.addCard(new CreatureCard("FireGoblin", 50, Elements.FIRE), "test");
-            db.addCard(new SpellCard("WaterSpout", 20, Elements.WATER), "test");
-            db.disconnect();
-        }catch (SQLException e){
-            System.out.println(e.getMessage());
-        }*/
+
+
     }
 
     public static void startServer(){
@@ -29,6 +29,16 @@ public class Main {
             server.start();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    public static void DB(){
+        DataBaseConnector db= new DataBaseConnector();
+        try{
+            db.connect();
+
+            db.disconnect();
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
         }
     }
 }

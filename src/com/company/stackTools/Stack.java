@@ -1,16 +1,33 @@
-package com.company.deckTools;
+package com.company.stackTools;
 import com.company.cards.BaseCard;
 import java.util.LinkedList;
 
-public class Deck {
-    private LinkedList list;
+public class Stack {
+    private LinkedList<BaseCard> list;
     private final String OWNER;
 
-    public Deck(String owner, BaseCard... cards) {
-        this.list=new LinkedList();
+    public Stack(String owner, BaseCard... cards) {
+        this.list=new LinkedList<BaseCard>();
         for (BaseCard card:cards){
             list.add(card);
         }
+        this.OWNER=owner;
+    }
+    public Stack(){
+        this.OWNER=null;
+        this.list=new LinkedList<BaseCard>();
+    }
+
+    public LinkedList<BaseCard> getList() {
+        return list;
+    }
+
+    public String getOWNER() {
+        return OWNER;
+    }
+
+    public Stack(String owner){
+        this.list=new LinkedList();
         this.OWNER=owner;
     }
 
@@ -24,7 +41,7 @@ public class Deck {
             return null;
         }
         int index= ((int)(Math.random()*list.size()));
-        return (BaseCard) list.remove(index);
+        return list.remove(index);
     }
 
     public void addCards(BaseCard... cards){

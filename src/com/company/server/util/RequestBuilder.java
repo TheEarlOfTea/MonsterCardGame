@@ -41,6 +41,7 @@ public class RequestBuilder {
         // TODO parse parameters
         parseContentType(request, header);
         parseContentLength(request, header);
+        parseAuthorization(request, header);
     }
 
     private static void parseMethodeAndRoute(Request request, String header) throws IOException {
@@ -57,6 +58,9 @@ public class RequestBuilder {
 
     private static void parseContentType(Request request, String header) {
         request.setContentType(getHttpHeader(header, "Content-Type"));
+    }
+    private static void parseAuthorization(Request request, String header){
+        request.setAuthorization(getHttpHeader(header, "Authorization"));
     }
 
     private static void parseContentLength(Request request, String header) {

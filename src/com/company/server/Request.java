@@ -6,6 +6,16 @@ public class Request {
     private String route;
     private String content;
     private String contentType;
+    private String authorization;
+
+    public String getAuthorization() {
+        return authorization;
+    }
+
+    public void setAuthorization(String authorization) {
+        this.authorization = authorization;
+    }
+
     private int contentLength;
 
     public String getMethod() {

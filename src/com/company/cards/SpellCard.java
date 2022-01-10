@@ -3,10 +3,13 @@ import com.company.auxilliary.CardType;
 import com.company.auxilliary.Elements;
 
 public class SpellCard extends BaseCard{
-    public SpellCard(String name, int power, Elements element){
-        super(name, power, element, CardType.SPELL);
+    public SpellCard(String uid, String name, int power, Elements element){
+        super(uid, name, power, element, CardType.SPELL);
     }
-    public SpellCard(String name, int power){
-        super(name, power, CardType.CREATURE);
+    public SpellCard(String uid, String name, int power){
+        super(uid, name, power, CardType.CREATURE);
+    }
+    public SpellCard(){
+        super();
     }
 }
