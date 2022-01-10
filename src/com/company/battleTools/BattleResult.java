@@ -1,11 +1,11 @@
-package com.company.engine;
+package com.company.battleTools;
 
-public class Result {
+public class BattleResult {
     private String winner;
     private String loser;
     private boolean draw;
 
-    public Result(){
+    public BattleResult(){
         this.draw=false;
     }
 

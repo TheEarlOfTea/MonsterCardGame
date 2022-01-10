@@ -1,5 +1,5 @@
 package com.company.stackTools;
-import com.company.cards.BaseCard;
+import com.company.stackTools.cards.BaseCard;
 import java.util.LinkedList;
 
 public class Stack {

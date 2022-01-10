@@ -15,7 +15,6 @@ public class Main {
 
         DataBaseSetup.setUp();
         startServer();
-
     }
 
     public static void startServer(){

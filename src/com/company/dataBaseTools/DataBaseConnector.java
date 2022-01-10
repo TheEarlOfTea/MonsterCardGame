@@ -3,7 +3,7 @@ import com.company.auxilliary.*;
 import com.company.auxilliary.enumUtils.StringToEnumConverter;
 import com.company.auxilliary.scoreBoardUtils.Score;
 import com.company.auxilliary.scoreBoardUtils.ScoreBoard;
-import com.company.cards.BaseCard;
+import com.company.stackTools.cards.BaseCard;
 import com.company.stackTools.DeckList;
 import com.company.stackTools.Stack;
 

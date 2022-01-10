@@ -1,6 +1,6 @@
-package com.company.engine;
+package com.company.battleTools;
 
-import com.company.cards.BaseCard;
+import com.company.stackTools.cards.BaseCard;
 import com.company.stackTools.Stack;
 
 public class Engine {
@@ -21,14 +21,14 @@ public class Engine {
         this.maxRounds=AUTO_MAX_ROUNDS;
     }
 
-    public Result battle(){
+    public BattleResult battle(){
         System.out.println("New Game!\n" +
                 "\n" + stackA.getOwner() +"s Deck: \n" + stackA +
                 "\n" + stackB.getOwner() +"s Deck: \n" + stackB);
         BaseCard cardA;
         BaseCard cardB;
-        Result result;
-        Result endResult=new Result();
+        BattleResult battleResult;
+        BattleResult endBattleResult =new BattleResult();
         if(stackA.size()==0 || stackB.size()==0){
             System.out.println("Please enter two non-empty decks" +
                     "\nCards in Deck A: " + stackA.size() +
@@ -37,33 +37,33 @@ public class Engine {
         for(int i=0; i<maxRounds;i++){
             cardA= stackA.getRandomCard();
             cardB= stackB.getRandomCard();
-            result= Judge.judgeFight(cardA,cardB, stackA.getOwner(), stackB.getOwner());
-            if(result.isDraw()){
+            battleResult= Judge.judgeFight(cardA,cardB, stackA.getOwner(), stackB.getOwner());
+            if(battleResult.isDraw()){
                 stackA.addCards(cardA);
                 stackB.addCards(cardB);
             }
-            else if(result.getWinner()== stackA.getOwner()){
+            else if(battleResult.getWinner()== stackA.getOwner()){
                 stackA.addCards(cardA, cardB);
             }
-            else if(result.getWinner()== stackB.getOwner()){
+            else if(battleResult.getWinner()== stackB.getOwner()){
                 stackB.addCards(cardA, cardB);
             }
 
             if (checkForDeckOut()){
                 if(stackA.size()==0){
-                    endResult.setWinner(stackB.getOwner());
-                    endResult.setLoser(stackA.getOwner());
+                    battleResult.setWinner(stackB.getOwner());
+                    battleResult.setLoser(stackA.getOwner());
                 }
                 else if(stackB.size()==0){
-                    endResult.setWinner(stackA.getOwner());
-                    endResult.setLoser(stackB.getOwner());
+                    battleResult.setWinner(stackA.getOwner());
+                    battleResult.setLoser(stackB.getOwner());
                 }
-                return endResult;
+                return battleResult;
             }
         }
         System.out.println("Game ended with a Draw!\n");
-        endResult.setDraw(true);
-        return endResult;
+        endBattleResult.setDraw(true);
+        return endBattleResult;
     }
 
     public boolean checkForDeckOut(){

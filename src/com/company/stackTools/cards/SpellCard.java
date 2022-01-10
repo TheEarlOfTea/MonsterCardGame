@@ -1,4 +1,4 @@
-package com.company.cards;
+package com.company.stackTools.cards;
 import com.company.auxilliary.enumUtils.CardType;
 import com.company.auxilliary.enumUtils.Elements;
 

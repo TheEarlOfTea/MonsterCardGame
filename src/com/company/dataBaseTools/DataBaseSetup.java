@@ -12,7 +12,7 @@ public class DataBaseSetup {
         Connection connection= DriverManager.getConnection(DBAuthentication.getDBLink(), DBAuthentication.getDBUser(), DBAuthentication.getDBPassword());
         createUserTable(connection);
         createCardTable(connection);
-        createTradeTable(connection);
+        //createTradeTable(connection);
         createPackageListTable(connection);
         createAdmin(connection);
         connection.close();
