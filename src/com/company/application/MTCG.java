@@ -5,6 +5,7 @@ import com.company.auxilliary.Token;
 import com.company.cards.BaseCard;
 import com.company.dataBaseTools.DataBaseConnector;
 import com.company.auxilliary.User;
+import com.company.dataBaseTools.TableNames;
 import com.company.server.http.ContentType;
 import com.company.stackTools.Stack;
 import com.company.server.Request;
@@ -65,9 +66,14 @@ public class MTCG implements ServerApplication {
         return b;
     }
 
+    private String serializeObject(Object object) throws JsonProcessingException{
+        JsonFactory factory= new JsonFactory();
+        ObjectMapper mapper= new ObjectMapper(factory);
+        return mapper.writeValueAsString(object);
+    }
+
     private Response chooseTask(Request request){
         DataBaseConnector db= new DataBaseConnector();
-        Response response=new Response();
         try{
             db.connect();
         }catch (SQLException e){
@@ -80,8 +86,21 @@ public class MTCG implements ServerApplication {
                 return createUser(request,db);
             case "/sessions":
                 return login(request,db);
-            case "/packages":
-                return createPackage(request, db);
+        }
+        Token token= db.checkToken(request.getAuthorization());
+        if(db.checkAdminToken(token.getToken())){
+            switch(request.getRoute()){
+                case "/packages":
+                    return createPackage(request, db);
+            }
+        }
+        if(!token.getToken().isEmpty()){
+            switch (request.getRoute()){
+                case "/transactions/packages":
+                    return acquirePack(token.getUsername(), request.getContent(), db);
+                case"/cards":
+                    return getCollection(token.getUsername(), db);
+            }
         }
         try{
             db.disconnect();
@@ -89,9 +108,9 @@ public class MTCG implements ServerApplication {
             printException(e);
             return get500Response();
         }
+        return get501Response();
 
 
-        return response;
     }
 
     public Response createUser(Request request, DataBaseConnector db){
@@ -132,7 +151,9 @@ public class MTCG implements ServerApplication {
             printException(e);
             response.setStatus(HttpStatus.SQL_ERROR);
             response.setContent("<!DOCTYPE html><html><body><h1>ERROR 900 || Package already Exists</h1></body></html>");
+            return response;
         }
+        response.setContent("<!DOCTYPE html><html><body><h1>Packs successfully created</h1></body></html>");
         return response;
     }
 
@@ -159,10 +180,51 @@ public class MTCG implements ServerApplication {
             return get400Response();
         }catch (SQLException e){
             printException(e);
-            response.setStatus(HttpStatus.SQL_ERROR);
-            response.setContent("<!DOCTYPE html><html><body><h1>ERROR 900 || Login Error</h1></body></html>");
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+            response.setContent("<!DOCTYPE html><html><body><h1>ERROR 500 || Login Error</h1></body></html>");
         }
         return response;
+    }
+
+    public Response acquirePack(String username, String packName, DataBaseConnector db){
+        Response response= new Response();
+        response.setContent("<!DOCTYPE html><html><body><h1>Pack successfully acquired</h1></body></html>");
+        try{
+            if(db.getCoins(username)<5){
+                response.setContent("<!DOCTYPE html><html><body><h1>User has not enough coins</h1></body></html>");
+                return response;
+            }
+        }catch (SQLException e){
+            printException(e);
+            return get500Response();
+        }
+
+        try{
+            if(db.checkForValue("name", TableNames.getPackageListTableName(), packName.replace("\"", ""))){
+                Stack s= db.getDeckFromTable(packName.replace("\"", ""), "-p");
+                db.changeCoins(username, -5);
+                for(BaseCard b: s.getDeck()){
+                    db.addCardToUserTable(b.getUid(), username);
+                }
+                return response;
+            }
+            response.setContent("<!DOCTYPE html><html><body><h1>ERROR 500 || Pack konnte nicht gefunden werden</h1></body></html>");
+        }catch (SQLException e){
+            printException(e);
+            return get500Response();
+        }
+        return response;
+    }
+    public Response getCollection(String username, DataBaseConnector db){
+        Response response= new Response();
+        try{
+            Stack s= db.getDeckFromTable(username, "-u");
+            response.setContent(serializeObject(s));
+            return response;
+        }catch (Exception e){
+            printException(e);
+            return get500Response();
+        }
     }
 
 

@@ -2,12 +2,15 @@ package com.company.auxilliary;
 
 public class Token {
     private String token;
+    private String username;
 
-    public Token(String token){
+    public Token(String token, String username){
         this.token=token;
+        this.username=username;
     }
     public Token(){
         this.token="";
+        this.username="";
     }
 
     public String getToken() {
@@ -16,5 +19,13 @@ public class Token {
 
     public void setToken(String token) {
         this.token = token;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

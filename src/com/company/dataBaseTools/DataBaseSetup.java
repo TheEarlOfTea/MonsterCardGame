@@ -1,5 +1,7 @@
 package com.company.dataBaseTools;
 
+import com.company.auxilliary.TokenGenerator;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,6 +14,7 @@ public class DataBaseSetup {
         createCardTable(connection);
         createTradeTable(connection);
         createPackageListTable(connection);
+        createAdmin(connection);
         connection.close();
     }
 
@@ -31,7 +34,7 @@ public class DataBaseSetup {
         }
     }
 
-    public static void createCardTable(Connection connection){
+    private static void createCardTable(Connection connection){
         PreparedStatement ps;
         try{
             ps=connection.prepareStatement("CREATE TABLE "+ TableNames.getCardListTableName() + " (uid varchar(255) not null, name varchar(255) not null, power integer not null, element varchar(255) not null, type varchar(255) not null)");
@@ -52,12 +55,23 @@ public class DataBaseSetup {
         }
     }
 
-    public static void createPackageListTable(Connection connection){
+    private static void createPackageListTable(Connection connection){
         PreparedStatement ps;
         try{
             ps=connection.prepareStatement("CREATE TABLE "+ TableNames.getPackageListTableName() +" (id serial, name varchar(255) not null)");
             ps.executeUpdate();
             ps=connection.prepareStatement("CREATE UNIQUE INDEX " + TableNames.getPackageListTableName()+ "_name_uindex ON " + TableNames.getPackageListTableName() + " (name);");
+            ps.executeUpdate();
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+        }
+    }
+    private static void createAdmin(Connection connection) {
+        try{
+            PreparedStatement ps= connection.prepareStatement("INSERT INTO "+ TableNames.getUserListTableName()+" (username, password, token) VALUES (?,?,?)");
+            ps.setString(1, "admin");
+            ps.setString(2, "istrator");
+            ps.setString(3, TokenGenerator.getAdminToken());
             ps.executeUpdate();
         }catch (SQLException e){
             System.out.println(e.getMessage());

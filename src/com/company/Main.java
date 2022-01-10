@@ -1,6 +1,7 @@
 package com.company;
 import com.company.application.MTCG;
 import com.company.auxilliary.Profile;
+import com.company.auxilliary.Token;
 import com.company.dataBaseTools.DataBaseSetup;
 import com.company.server.MyServer;
 import com.company.dataBaseTools.DataBaseConnector;
@@ -12,12 +13,9 @@ public class Main {
 
     public static void main(String[] args) throws SQLException{
 
-        /*ÜDataBaseSetup.setUp();
-        startServer();*/
-        Profile p= new Profile();
-        p.setWins(3);
-        p.setLosses(7);
-        System.out.println(p.getWinrate());
+        DataBaseSetup.setUp();
+        startServer();
+        //DB();
 
 
 
@@ -35,7 +33,6 @@ public class Main {
         DataBaseConnector db= new DataBaseConnector();
         try{
             db.connect();
-
             db.disconnect();
         }catch (SQLException e){
             System.out.println(e.getMessage());

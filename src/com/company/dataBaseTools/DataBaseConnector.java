@@ -1,6 +1,7 @@
 package com.company.dataBaseTools;
 import com.company.auxilliary.StringToEnumConverter;
 import com.company.auxilliary.Token;
+import com.company.auxilliary.TokenGenerator;
 import com.company.auxilliary.User;
 import com.company.cards.BaseCard;
 import com.company.stackTools.Stack;
@@ -28,11 +29,11 @@ public class DataBaseConnector {
     public void createUser(User user) throws SQLException{
         PreparedStatement ps;
         String stackName= TableNames.getUserStackTableName(user.getUsername());
-        ps=connection.prepareStatement("INSERT INTO users (username, password, collection, token) VALUES (?,?,?,?)");
+        ps=connection.prepareStatement("INSERT INTO "+ TableNames.getUserListTableName()+" (username, password, collection, token) VALUES (?,?,?,?)");
         ps.setString(1, user.getUsername());
         ps.setString(2, user.getPassword());
         ps.setString(3, stackName);
-        ps.setString(4, user.getUsername()+"-mtcgToken");
+        ps.setString(4, TokenGenerator.getUserToken(user.getUsername()));
         ps.executeUpdate();
         createUserStackTable(stackName);
     }
@@ -57,7 +58,7 @@ public class DataBaseConnector {
 
         addCardsToCardListTable(s);
 
-        for(BaseCard b : s.getList()){
+        for(BaseCard b : s.getDeck()){
             addCardsToPackage(b.getUid(), s.getOwner());
         }
     }
@@ -105,11 +106,22 @@ public class DataBaseConnector {
         ps.executeUpdate();
         return true;
     }
+    public boolean checkForValue(String field, String table,  String value) throws SQLException{
+        PreparedStatement ps;
+        ResultSet rs;
+        ps=connection.prepareStatement("SELECT " + field + " FROM " + table + " WHERE " + field + "=?");
+        ps.setString(1, TableNames.getPackageTableName(value.toLowerCase()));
+        rs=ps.executeQuery();
+        if(rs.next()){
+            return true;
+        }
+        return false;
+    }
 
     public boolean addCardsToCardListTable(Stack d){
         PreparedStatement ps;
         boolean wasIssue=false;
-        for(BaseCard b: d.getList()){
+        for(BaseCard b: d.getDeck()){
             try{
                 ps=connection.prepareStatement("INSERT INTO "+ TableNames.getCardListTableName() + " (uid, name, power, element, type) VALUES (?,?,?,?,?)");
                 ps.setString(1, b.getUid());
@@ -163,7 +175,6 @@ public class DataBaseConnector {
             ps=connection.prepareStatement("SELECT uid FROM " + tableName);
             uids=ps.executeQuery();
             while(uids.next()){
-                System.out.println(uids.getString(1));
                 if((b=getCard(uids.getString(1)))!=null){
                     d.addCards(b);
                 }
@@ -197,6 +208,32 @@ public class DataBaseConnector {
         return true;
     }
 
+    public Token checkToken(String givenToken){
+        PreparedStatement ps;
+        ResultSet rs;
+        Token token= new Token();
+        try {
+            ps = connection.prepareStatement("SELECT username, token FROM " + TableNames.getUserListTableName() + " WHERE token=?;");
+            ps.setString(1, givenToken);
+            rs = ps.executeQuery();
+            if (rs.next()) {
+                token.setUsername(rs.getString("username"));
+                token.setToken(rs.getString("token"));
+            }
+            rs.close();
+            return token;
+        }catch (SQLException e){
+            System.out.println(e.getMessage());
+            return token;
+        }
+    }
+    public boolean checkAdminToken(String givenToken){
+        if(givenToken.compareTo(TokenGenerator.getAdminToken())==0){
+            return true;
+        }
+        return false;
+    }
+
     public void changeElo(String username, int eloChange) throws SQLException{
         PreparedStatement ps;
         int updatedElo;
@@ -214,7 +251,7 @@ public class DataBaseConnector {
         PreparedStatement ps;
         int updatedCoins;
 
-        updatedCoins= getCoins(username)+ coinChange;
+        updatedCoins= getCoins(username) + coinChange;
 
         ps= connection.prepareStatement("UPDATE users SET coins=? WHERE username=?");
         ps.setInt(1, updatedCoins);
